@@ -8,6 +8,8 @@ mismatch<- 0
 #select start and end positions of the graph
 str<- 9095
 end<- 9117
+#set the RACE adapter sequence
+RACE_adapter<- "GGACACTGACATGGACTGAAGGAGTAGAAA"
 #input the data in .fastq or .fastq.gz format
 input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
 #input the reference sequence in .fasta format
@@ -24,7 +26,7 @@ pdf_name <- paste(prefix, "_", filename, ".pdf", sep="")
 csv_name <- paste(prefix, "_", filename, ".csv", sep="")
 csv_br_name <- paste(prefix, "_", filename, "_br.csv", sep="")
 #perform adapter trimming with cutadapt, alignment with bowtie and read count using bedtools
-CMD_bow<- paste("cutadapt -gGGACACTGACATGGACTGAAGGAGTAGAAA -e0 --no-indels -m10 --discard-untrimmed", input_data,"|bowtie -p 2 -S -k 1 -v", mismatch, "index - | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
+CMD_bow<- paste("cutadapt -g", RACE_adapter, "-e0 --no-indels -m10 --discard-untrimmed", input_data,"|bowtie -p 2 -S -k 1 -v", mismatch, "index - | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
 system(CMD_bow)
 #read and merge ref and reads
 reads<- read.delim(out_name, header = F )
