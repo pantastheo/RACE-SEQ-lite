@@ -2,7 +2,7 @@ suppressPackageStartupMessages(suppressWarnings(suppressMessages(library("Biostr
 suppressPackageStartupMessages(suppressWarnings(suppressMessages(library("tools"))))
 
 #set output name prefix
-prefix<- "siRNA19_mm0"
+prefix<- "ENTER_NAME_PREFIX_HERE"
 #set the mismatch tolerance for alignment 
 mismatch<- 0
 #select start and end positions of the graph
