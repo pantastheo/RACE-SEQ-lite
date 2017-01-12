@@ -2,11 +2,11 @@
 
 This is a custom R script for the downstream analysis of RACE-seq data.
 
-UNIX/LINUX package dependencies:
-	- CUTADAPT
-	- BOWTIE
-	- SAMTOOLS
-	- BEDTOOLS
+UNIX/LINUX package dependencies:	
+- CUTADAPT
+- BOWTIE
+- SAMTOOLS
+- BEDTOOLS
 
 HOW TO CONFIGURE:
 - Open the script and edit the variables acording to your RNA binding region, adapter sequence and other preferences.
