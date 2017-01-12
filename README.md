@@ -1,3 +1,5 @@
+#RACE-seq-analysis
+
 This is a custom R script for the downstream analysis of RACE-seq data.
 
 UNIX/LINUX package dependencies:	
