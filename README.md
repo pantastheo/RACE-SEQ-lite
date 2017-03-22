@@ -1,4 +1,4 @@
-#RACE-seq-analysis
+# RACE-seq-analysis
 
 This is a custom R script for the downstream analysis of RACE-seq data.
 
@@ -29,4 +29,4 @@ HOW TO RUN:
 	- Input dataset in .FASTQ format
 	- Reference sequence in .FASTA format
   
-- To run the script you can use either run it using the Rscript command from the command line/terminal or open it in Rstudio and run it from there.
+- To run the script you can either run it using the Rscript command from the command line/terminal or open it in Rstudio and run it from there.
