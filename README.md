@@ -1,4 +1,4 @@
-# RACE-seq-analysis
+# RACE-SEQ lite
 
 This is a custom R script for the downstream analysis of RACE-seq data.
 
