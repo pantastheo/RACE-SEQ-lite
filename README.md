@@ -24,7 +24,7 @@ HOW TO CONFIGURE: - Open and edit the script variables acording to your preferen
 
 HOW TO RUN: - To run the analysis you will need to have in the same folder the following files:
 - The RACE-SEQ lite script downloded and edited as stated above
-- Sequencing data in .fastq format
-- Reference sequence in .fasta format
+- Only one sequencing data file in .fastq format
+- Only one reference sequence file in .fasta format
   
 To run the script you can either run it using Rscript from the command line or run it from within Rstudio.
