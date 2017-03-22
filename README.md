@@ -8,8 +8,7 @@ UNIX/LINUX package dependencies:
 - SAMTOOLS
 - BEDTOOLS
 
-HOW TO CONFIGURE:
-- Open the script and edit the variables acording to your RNA binding region, adapter sequence and other preferences.
+HOW TO CONFIGURE: - Open and edit the script variables acording to your preferences.
 
 - Set the start and finish nucleotide positions in between which the graphs will be plotted. 
 	- To do that edit the "str" and "end" variables and set them to the specific nucleotide positions in the reference sequence you provide.
@@ -23,10 +22,9 @@ HOW TO CONFIGURE:
 - Set the mismatch tolerence that you want the BOWTIE aligner to perform alignment with.
 	- To do that edit the "mismatch" variable and set it to a numeric value, preferably between "0" and "3"
 
-HOW TO RUN:
-- To run the analysis you will need to have in the same folder these specific files:
-	- The R script downloded and edited according to your options
-	- Input dataset in .FASTQ format
-	- Reference sequence in .FASTA format
+HOW TO RUN: - To run the analysis you will need to have in the same folder the following files:
+- The RACE-SEQ lite script downloded and edited as stated above
+- Sequencing data in .fastq format
+- Reference sequence in .fasta format
   
-- To run the script you can either run it using the Rscript command from the command line/terminal or open it in Rstudio and run it from there.
+To run the script you can either run it using Rscript from the command line or run it from within Rstudio.
