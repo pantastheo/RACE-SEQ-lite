@@ -9,7 +9,6 @@ packages<-function(x){
 #List of required libraries to be loaded
 suppressMessages(packages(Biostrings))
 suppressMessages(packages(tools))
-suppressMessages(packages(stringi))
 
 #set output name prefix
 prefix<- "your_file_name_here"
