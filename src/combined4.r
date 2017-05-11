@@ -99,7 +99,7 @@ ref_replace<- function(str,end, replicon_ref){
   
   
   names_list<- data.frame(count_names[((((end-str)+1)*3)+1):1,], stringsAsFactors = F)
-  names_list[(nrow(names_list)),]<-"wildtype siRNA"
+  names_list[(nrow(names_list)),]<-"wildtype_siRNA"
   
   ref_list<-nt[str:end,1:((((end-str)+1)*3)+1)]
   trans_list<- as.data.frame(t(ref_list[,ncol(ref_list):1]), stringsAsFactors = F)
@@ -114,7 +114,6 @@ ref_replace<- function(str,end, replicon_ref){
   return(names_list)
 }
 
-ref_replace(str,end, replicon_ref)
 
 target<- ref_replace(str,end, replicon_ref)
 
@@ -206,9 +205,9 @@ dataframe_linear[1]<- NULL
 
 #name the mismatches columns acording to position and nt tranformation
 colnames(nt_reference) <- "nucleotide"
-colnames(dataframe_counts)<- target[1:(nrow(target)),]
-colnames(dataframe_log10) <- target[1:(nrow(target)),]
-colnames(dataframe_linear) <- target[1:(nrow(target)),]
+colnames(dataframe_counts)<- target$name
+colnames(dataframe_log10) <- target$name
+colnames(dataframe_linear) <- target$name
 
 
 #merge and write csv tables in log and linear
@@ -226,7 +225,8 @@ mm0[mm0== -Inf] <-0
 colnames(mm0) <- c("nucleotide","counts", "linear", "log10")
 write.table(mm0, "mm0_wildtype.csv", sep = "\t", quote = F, row.names = F)
 
-#mm0<- read.csv("mm0_wildtype.csv", sep = "\t")
+mm0<- read.csv("mm0_wildtype.csv", sep = "\t")
+log10_region<- read.csv("CSV_log10_region.csv", sep = "\t")
 
 # create wildtype linear & log scale graph #
 
@@ -267,159 +267,76 @@ graph(mm0,pdf)
 
 
 ##end of wildtype graph##
+#ggplot2 graph function
 
-# ##### ggplot2 graph#####
-# 
-# 
-# 
-# 
-# write.table(N, file = "graph_log_table.csv", sep = "\t", quote = F, row.names = F)
-# 
-# setEPS()
-# postscript("seed_region.eps", width=10)
-# 
-# si02<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) +
-#   geom_line(aes(y=N$siRNA_02_g), colour="black", size= 1) + 
-#   geom_line(aes(y=N$siRNA_02_c), colour="blue", size=1) + 
-#   geom_line(aes(y=N$siRNA_02_t), colour="red", size=1)+
-#   scale_x_discrete()+
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt2)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=20, y=-0.4, label= N[20,1], size=5)
-# 
-# 
-# si03<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) + 
-#   geom_line(aes(y=N$siRNA_03_g), colour="black", size= 1) + 
-#   geom_line(aes(y=N$siRNA_03_c), colour="blue", size=1) + 
-#   geom_line(aes(y=N$siRNA_03_t), colour="red", size=1)+
-#   scale_x_discrete()+
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt3)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=19, y=-0.4, label= N[19,1], size=5)
-# 
-# si04<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) + 
-#   geom_line(aes(y=N$siRNA_04_a), colour="green", size= 1) + 
-#   geom_line(aes(y=N$siRNA_04_g), colour="black", size=1)+
-#   geom_line(aes(y=N$siRNA_04_t), colour="red", size=1) + 
-#   scale_x_discrete()+
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt4)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=18, y=-0.4, label= N[18,1], size=5)
-# 
-# si05<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) + 
-#   geom_line(aes(y=N$siRNA_05_a), colour="green", size= 1) + 
-#   geom_line(aes(y=N$siRNA_05_g), colour="black", size=1)+
-#   geom_line(aes(y=N$siRNA_05_t), colour="red", size=1) + 
-#   scale_x_discrete() +
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt5)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=17, y=-0.4, label= N[17,1], size=5)
-# 
-# si06<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) + 
-#   geom_line(aes(y=N$siRNA_06_a), colour="green", size=1)+
-#   geom_line(aes(y=N$siRNA_06_g), colour="black", size= 1) + 
-#   geom_line(aes(y=N$siRNA_06_c), colour="blue", size=1) + 
-#   scale_x_discrete() +
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt6)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=16, y=-0.4, label= N[16,1], size=5)
-# 
-# si07<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) + 
-#   geom_line(aes(y=N$siRNA_07_a), colour="green", size=1) + 
-#   geom_line(aes(y=N$siRNA_07_g), colour="black", size= 1) + 
-#   geom_line(aes(y=N$siRNA_07_t), colour="red", size=1)+
-#   scale_x_discrete() +
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt7)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=15, y=-0.4, label= N[15,1], size=5)
-# 
-# grid.arrange(si02, si03, si04, si05, si06, si07)
-# 
-# dev.off()
-# 
+
+N<- CSV_log[str:end,]
+
+write.table(N, file = "graph_log_table.csv", sep = "\t", quote = F, row.names = F)
+#N<-read.csv("graph_log_table.csv", sep = "\t")
+
+ggraph2<-function(N,a,b){ 
+
+si02<- ggplot(N, aes(N[,2], x = seq_along(N[,2])))+
+  ylim(-0.4,8)+
+  xlab("Binding site")+
+  ylab(expression("Novel 5\' Ends (log"[10]*")"))+
+  geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) +
+  geom_line(aes(y=N[,a]), colour="lightgrey", size= 1) +
+  geom_line(aes(y=N[,(a+1)]), colour="darkgrey", size=1) +
+  geom_line(aes(y=N[,(a+2)]), colour="black", size=1)+
+  scale_x_discrete()+
+  geom_text(data = NULL, x=c(1:(nrow(N))), y=-0.4, label= N[,1])+
+  coord_cartesian(xlim = c(1,(nrow(N))))+
+  geom_text(data = NULL, x=(((nrow(N))+1)-b), y=-0.4, label= N[(((nrow(N))+1)-b),1], size=5)
+  return(si02)
+}
+#ggraph2(N,3,1)
+
+
+gtable<-data.frame(1)
+col<-3
+row<-1
+for (i in (c(1:(nrow(N))))) {
+  gtable[i,]<- paste("ggraph2(N,",col,",",row,")",sep = "" )
+  col=col+3
+  row=row+1
+  
+}
+
+si01<- ggraph2(N,3,1)
+si02<- ggraph2(N,6,2)
+si03<- ggraph2(N,9,3)
+si04<- ggraph2(N,12,4)
+si05<- ggraph2(N,15,5)
+si06<- ggraph2(N,18,6)
+si07<- ggraph2(N,21,7)
+si08<- ggraph2(N,24,8)
+si09<- ggraph2(N,27,9)
+si10<- ggraph2(N,30,10)
+si11<- ggraph2(N,33,11)
+si12<- ggraph2(N,36,12)
+si13<- ggraph2(N,39,13)
+si14<- ggraph2(N,43,14)
+si15<- ggraph2(N,45,15)
+
+pdf("seed_reg.pdf", width=13)
+
+grid.arrange(si01, si02, si03, si04, si05, si06, si07, si08, si09)
+dev.off()
+
+
+pdf("cleavage_reg.pdf", width=13)
+grid.arrange(si10, si11, si12, si13, si14, si15)
+dev.off()
+ 
 # setEPS()
 # postscript("cleavage_region.eps", width=10)
-# 
-# si09<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) +
-#   geom_line(aes(y=N$siRNA_09_a), colour="green", size=1)+
-#   geom_line(aes(y=N$siRNA_09_g), colour="black", size=1) + 
-#   geom_line(aes(y=N$siRNA_09_t), colour="red", size= 1) + 
-#   scale_x_discrete() +
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt9)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=13, y=-0.4, label= N[13,1], size=5)
-# 
-# si10<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) +
-#   geom_line(aes(y=N$siRNA_10_a), colour="green", size= 1) + 
-#   geom_line(aes(y=N$siRNA_10_g), colour="black", size=1) + 
-#   geom_line(aes(y=N$siRNA_10_c), colour="blue", size=1)+
-#   scale_x_discrete() +
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt10)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=12, y=-0.4, label= N[12,1], size=5)
-# 
-# si11<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) +
-#   geom_line(aes(y=N$siRNA_11_a), colour="green", size=1) + 
-#   geom_line(aes(y=N$siRNA_11_g), colour="black", size= 1) + 
-#   geom_line(aes(y=N$siRNA_11_t), colour="red", size=1)+
-#   scale_x_discrete() +
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt11)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=11, y=-0.4, label= N[11,1], size=5)
-# 
-# si12<- ggplot(N, aes(siRNA_00_N, x = seq_along(siRNA_00_N)))+
-#   ylim(-0.4,8)+
-#   xlab("Binding site")+
-#   ylab(expression("Novel 5\' Ends (log"[10]*")"))+
-#   geom_bar(stat = "identity", colour="black",fill="white", width = 0.4) +
-#   geom_line(aes(y=N$siRNA_12_g), colour="black", size=1) + 
-#   geom_line(aes(y=N$siRNA_12_c), colour="blue", size= 1) + 
-#   geom_line(aes(y=N$siRNA_12_t), colour="red", size=1)+
-#   scale_x_discrete() +
-#   geom_text(data = NULL, x=c(1:21), y=-0.4, label= N$nt12)+
-#   coord_cartesian(xlim = c(1,21))+
-#   geom_text(data = NULL, x=10, y=-0.4, label= N[10,1], size=5)
-# 
+
 # grid.arrange(si09, si10, si11, si12)
 # 
 # dev.off()
-#####
+
 
 time_finish<- Sys.time()
 print("operation finished on")
