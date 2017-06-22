@@ -8,7 +8,6 @@ packages<-function(x){
 }
 #List of required libraries to be loaded
 suppressMessages(packages(Biostrings))
-suppressMessages(packages(tools))
 
 #set output name prefix
 prefix<- "your_file_name_here"
@@ -23,9 +22,9 @@ mismatch<- 0
 #read the original wildtype reference
 replicon_ref<- list.files(".", pattern =".fasta", all.files = F, full.names = F)
 
-nt_reference<- strsplit((toString(readBStringSet(replicon_ref))), NULL ,fixed = T )
-nt_reference<- data.frame(lapply(nt_reference, function(v) {
-  if (is.character(v)) return(toupper(v))
+#read nucleotide reference and convert to character string
+nt <- data.frame(lapply(replicon_ref, function(v) {
+  if (is.character(v)) return(strsplit(toupper((toString(readBStringSet(replicon_ref)))), NULL , fixed = T))
   else return(v)
 }), stringsAsFactors = F)
 
@@ -47,20 +46,16 @@ CMD_bow<- paste("bowtie -p 2 -S -k 1 -v", mismatch, "index", input_data," | samt
 system(CMD_bow)
 
 #read and merge ref and reads
-dataframe<- read.delim(out_name, header = F, stringsAsFactors = F )
-dataframe[,4] <- (dataframe[,3])
-dataframe[,3] <- (nt_reference)
+reads<- read.delim(out_name, header = F )
+dataframe<- data.frame(reads, nt_reference , stringsAsFactors = F)
 
 #calculating the % and log10 columns
-dataframe[,5] <- (dataframe[,4]/sum(dataframe[,4])*100)
-dataframe[,6] <- (log10(dataframe[,4]))
-
-dataframe[,1]<- NULL
+dataframe[,5] <- (dataframe[,3]/sum(dataframe[,3])*100)
+dataframe[,6] <- (log10(dataframe[,3]))
 dataframe[dataframe== -Inf] <-0
-colnames(dataframe) <- c("position","nucleotide","counts", "linear", "log10")
 
-write.table(dataframe, csv_name, sep = "\t", quote = F, row.names = F)
-write.table(dataframe[str:end,], csv_br_name, sep = "\t", quote = F, row.names = F)
+write.table(dataframe, file = csv_name , sep = "\t",col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),row.names = F )
+write.table(dataframe[str:end,], file = csv_br_name , sep = "\t",col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),row.names = F )
 
 #remove read_count and index file created
 counts<- list.files(".", pattern="read_count", all.files = F, full.names = F)
