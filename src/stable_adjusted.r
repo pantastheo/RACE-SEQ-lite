@@ -23,10 +23,8 @@ mismatch<- 0
 replicon_ref<- list.files(".", pattern =".fasta", all.files = F, full.names = F)
 
 #read nucleotide reference and convert to character string
-nt <- data.frame(lapply(replicon_ref, function(v) {
-  if (is.character(v)) return(strsplit(toupper((toString(readBStringSet(replicon_ref)))), NULL , fixed = T))
-  else return(v)
-}), stringsAsFactors = F)
+nt<-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
+nt<- data.frame(lapply(nt, function(x) toupper(x)), stringsAsFactors = F)
 
 #input the data in .fastq or .fastq.gz format
 input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
@@ -47,7 +45,7 @@ system(CMD_bow)
 
 #read and merge ref and reads
 reads<- read.delim(out_name, header = F )
-dataframe<- data.frame(reads, nt_reference , stringsAsFactors = F)
+dataframe<- data.frame(reads, nt , stringsAsFactors = F)
 
 #calculating the % and log10 columns
 dataframe[,5] <- (dataframe[,3]/sum(dataframe[,3])*100)

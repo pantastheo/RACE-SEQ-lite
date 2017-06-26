@@ -29,11 +29,8 @@ input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
 mm_ref<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
 
 #reading and transforming reference sequence
-nt_reference<- strsplit((toString(readBStringSet(mm_ref))), NULL ,fixed = T )
-nt_reference<- data.frame(lapply(nt_reference, function(v) {
-  if (is.character(v)) return(toupper(v))
-  else return(v)
-}), stringsAsFactors = F)
+nt<- strsplit((toString(readBStringSet(mm_ref))), NULL ,fixed = T )
+nt<- data.frame(lapply(nt, function(x) toupper(x)), stringsAsFactors = F)
     
 #build the index
 CMD_tmapindex<- paste("tmap index -f", mm_ref , sep=" ")
@@ -61,7 +58,7 @@ system(CMD_bedtools)
 
 #read and merge ref and reads
 reads<- read.delim(out_name, header = F )
-dataframe<- data.frame(reads, nt_reference , stringsAsFactors = F)
+dataframe<- data.frame(reads, nt , stringsAsFactors = F)
     
 #calculating the % and log10 columns
 dataframe[,5] <- (dataframe[,3]/sum(dataframe[,3])*100)

@@ -23,10 +23,8 @@ ref_replace <- function( str, end, replicon_ref ) {
   suppressMessages(packages(Biostrings))
   
   #read nucleotide reference and convert to character string
-  nt <- data.frame(lapply(replicon_ref, function(v) {
-    if (is.character(v)) return(strsplit(toupper((toString(readBStringSet(replicon_ref)))), NULL , fixed = T))
-    else return(v)
-  }), stringsAsFactors = F)
+  nt <-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
+  nt<- data.frame(lapply(nt, function(x) toupper(x)), stringsAsFactors = F)
   
   
   #loop the reference for start and end location and create nucleotide substitutions

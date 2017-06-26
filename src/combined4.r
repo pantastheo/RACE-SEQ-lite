@@ -11,10 +11,10 @@ packages <- function(x) {
     require(x, character.only = TRUE)
   }
 }
-#List of required libraries to be loaded
-source("https://bioconductor.org/biocLite.R")
-suppressMessages(biocLite("Biostrings"))
-suppressMessages(biocLite("ShortRead"))
+# #List of required libraries to be loaded
+# source("https://bioconductor.org/biocLite.R")
+# suppressMessages(biocLite("Biostrings"))
+# suppressMessages(biocLite("ShortRead"))
 
 suppressMessages(packages(Biostrings))
 suppressMessages(packages(tools))
@@ -40,14 +40,8 @@ replicon_str <- (toString(readBStringSet(replicon_ref)))
 #read and transform the reference
 
 ref_replace <- function(str, end, replicon_ref) {
-  nt_reference <-
-    strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
-  nt <- data.frame(lapply(nt_reference, function(v) {
-    if (is.character(v))
-      return(toupper(v))
-    else
-      return(v)
-  }), stringsAsFactors = F)
+  nt_reference <-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
+  nt<- data.frame(lapply(nt_reference, function(x) toupper(x)), stringsAsFactors = F)
   
   
   a = 0

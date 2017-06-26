@@ -34,11 +34,8 @@ input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
 mm_ref<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
 
 #reading and transforming reference sequence
-nt_reference<- strsplit((toString(readBStringSet(mm_ref))), NULL ,fixed = T )
-nt_reference<- data.frame(lapply(nt_reference, function(v) {
-  if (is.character(v)) return(toupper(v))
-  else return(v)
-}), stringsAsFactors = F)
+nt_reference <-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
+nt_reference<- data.frame(lapply(nt_reference, function(x) toupper(x)), stringsAsFactors = F)
     
 #build the index
 CMD_index<- paste("bowtie-build -q -f", mm_ref, "index", sep=" ")
