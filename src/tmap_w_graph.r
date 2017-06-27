@@ -12,7 +12,7 @@ packages<-function(x){
 suppressMessages(packages(Biostrings))
 
 #set output name prefix
-prefix<- "tmap_test"
+prefix<- "tmap"
 
 #set the mismatch tolerance for alignment 
 mismatch<- 0
@@ -21,44 +21,34 @@ mismatch<- 0
 str<- 9478
 end<- 9498
 
-
 #input the data in .fastq or .fastq.gz format
 input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
 
 #input the reference sequence in .fasta format
-mm_ref<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
+replicon_ref<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
 
 #reading and transforming reference sequence
-nt<- strsplit((toString(readBStringSet(mm_ref))), NULL ,fixed = T )
-nt<- data.frame(lapply(nt, function(x) toupper(x)), stringsAsFactors = F)
-    
-#build the index
-CMD_tmapindex<- paste("tmap index -f", mm_ref , sep=" ")
-system(CMD_tmapindex)
-    
+nt_reference <-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
+nt_reference<- data.frame(lapply(nt_reference, function(x) toupper(x)), stringsAsFactors = F)
+
 #set output names
 filename <- paste("mm", mismatch, sep="")
 out_name <- paste("read_count_", filename, ".txt", sep="")
 csv_name <- paste(prefix, "_", filename, ".csv", sep="")
 csv_br_name <- paste(prefix, "_", filename, "_br.csv", sep="")
     
-#perform alignment with bowtie and read count using bedtools
+#build the index and perform alignment with tmap and read count using bedtools
 
-CMD_tmap <- paste("tmap map1 -a 0 -g 3 --max-mismatches 0 -f", mm_ref," -r ",input_data," -s out.sam", sep="") 
+CMD_tmapindex<- paste("tmap index -f", mm_ref , sep=" ")
+system(CMD_tmapindex)
 
-CMD_samtools <- paste("samtools view -bt replicon.fasta out.sam > aligned.bam", sep="")
-
-CMD_bedtools <- paste("genomeCoverageBed -d -5 -ibam aligned.bam >",out_name ,sep="")
-
-
+CMD_tmap<- paste("tmap map1 -a 0 -g 3 --max-mismatches ",mismatch," -f ", mm_ref," -r ", input_data, " | samtools view -bt replicon.fasta - | genomeCoverageBed -d -5 -ibam stdin > ",out_name, sep="")
 system(CMD_tmap)
-system(CMD_samtools)
-system(CMD_bedtools)
 
 
 #read and merge ref and reads
 reads<- read.delim(out_name, header = F )
-dataframe<- data.frame(reads, nt , stringsAsFactors = F)
+dataframe<- data.frame(reads, nt_reference , stringsAsFactors = F)
     
 #calculating the % and log10 columns
 dataframe[,5] <- (dataframe[,3]/sum(dataframe[,3])*100)
