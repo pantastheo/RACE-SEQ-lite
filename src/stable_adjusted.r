@@ -22,16 +22,12 @@ mismatch<- 0
 #read the original wildtype reference
 replicon_ref<- list.files(".", pattern =".fasta", all.files = F, full.names = F)
 
-#read nucleotide reference and convert to character string
-nt<-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
-nt<- data.frame(lapply(nt, function(x) toupper(x)), stringsAsFactors = F)
-
 #input the data in .fastq or .fastq.gz format
 input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
 
-#build the index
-CMD_index<- paste("bowtie-build -q -f", replicon_ref, "index", sep=" ")
-system(CMD_index)
+#read nucleotide reference and convert to character string
+nt<-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
+nt<- data.frame(lapply(nt, function(x) toupper(x)), stringsAsFactors = F)
 
 #set output names
 filename <- paste(mismatch, "mm", sep="")
@@ -39,7 +35,10 @@ out_name <- paste("read_count_", filename, ".txt", sep="")
 csv_name <- paste("CSV_",prefix, "_", filename, ".csv", sep="")
 csv_br_name <- paste("CSV_",prefix, "_", filename, "_region.csv", sep="")
 
-#perform alignment with bowtie and read count using bedtools
+#build the index and perform alignment with bowtie and read count using bedtools
+CMD_bowindex<- paste("bowtie-build -q -f", replicon_ref, "index", sep=" ")
+system(CMD_bowindex)
+
 CMD_bow<- paste("bowtie -p 2 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
 system(CMD_bow)
 
