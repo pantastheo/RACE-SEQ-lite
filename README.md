@@ -6,8 +6,8 @@ This is a custom R script for the downstream analysis of RACE-seq data.
 
 The following programs and packages must be installed on your computer.
 
-Package       | Written with version
-------------- | --------------------
+Package       | Version
+------------- | -------------
 Cutadapt      | >=1.12
 Bowtie        | 1.0.0
 Samtools      | >=1.3.1
