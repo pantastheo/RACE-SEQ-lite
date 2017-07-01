@@ -69,7 +69,7 @@ if(!is.na(opt$s) & !is.na(opt$e)) {
     if ((length(data_fastq))==0) {
       stop("No input .fastq file available")
     } else if ((length(data_fastq))>=2) {
-      stop("More than one fastq file")
+      stop("More than one .fastq file")
     } else if ((length(data_fastq))==1) {
       input_data<- data_fastq
     } 
@@ -83,14 +83,13 @@ if (opt$t==TRUE){
   
   prefix<-"tmap"
   
-  #set output names
-  filename <- paste("mm", mismatch, sep="")
-  out_name <- paste("read_count_", filename, ".txt", sep="")
-  csv_name <- paste(prefix, "_", filename, ".csv", sep="")
+  #set output name
+  filename <- paste("mm", mismatch, sep = "")
+  out_name <- paste("read_count_", filename, sep="")
   
   #build the index and perform alignment with tmap and read count using bedtools
   
-  print("Performing alignment using tmap")
+  print(paste0("Performing alignment with ", mismatch, " mismatch using tmap"))
   
   CMD_tmapindex<- paste("tmap index -f", replicon_ref , sep=" ")
   system(CMD_tmapindex)
@@ -101,14 +100,12 @@ if (opt$t==TRUE){
   
   prefix<-"bowtie"
   
-  #set output names
-  filename <- paste("mm", mismatch, sep="")
-  out_name <- paste("read_count_", filename, ".txt", sep="")
-  csv_name <- paste(prefix, "_", filename, ".csv", sep="")
+  #set output name
+  filename <- paste("mm", mismatch, sep = "")
+  out_name <- paste("read_count_mm", mismatch, sep="")
   
   #build the index and perform alignment with bowtie and read count using bedtools
-  
-  print("Performing alignment using bowtie")
+  print(paste0("Performing alignment with ", mismatch, " mismatch using bowtie"))
   
   CMD_bowindex<- paste("bowtie-build -q -f", replicon_ref, "index", sep=" ")
   system(CMD_bowindex)
@@ -157,7 +154,9 @@ for(i in index_files ){
 }
 
 if (opt$no_csv==FALSE){
-write.table(binding_region, file = csv_name , sep = "\t",col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),row.names = F )
+write.table(binding_region, file = paste0(prefix, "_", filename, ".csv") , sep = "\t",
+            col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),
+            row.names = F )
 }
 
 
