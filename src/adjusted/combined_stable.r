@@ -11,17 +11,6 @@ packages <- function(x) {
 suppressMessages(packages(optparse))
 suppressMessages(packages(Biostrings))
 
-# parser <- ArgumentParser(usage = "Usage: [options] -s <integer> -e <integer> -m <integer> \n", 
-#                          description = "This is a custom R script for the downstream analysis of RACE-seq data.", 
-#                          epilogue = "Thank you for using RACE-SEQ lite")
-# 
-# parser$add_argument("-s", "--start", dest="start_nt", default=NA,
-#                     help="Input the start nucleotide position")
-# parser$add_argument("-e", "--end", dest="end_nt", default=NA,
-#                     help="Input the end nucleotide position")
-# parser$add_argument("-m", "--mismatch", dest="mismatch", default=0, metavar="mismatch", type="integer")
-# parser$print_help()
-
 option_list<- list(
   make_option(c("-s", "--start"), type="integer", action = "store", default = NA,
               help="Input the start nucleotide position"),
