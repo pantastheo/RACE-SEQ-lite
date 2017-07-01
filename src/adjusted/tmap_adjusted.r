@@ -10,6 +10,14 @@ packages <- function(x) {
 #List of required libraries to be loaded
 suppressMessages(packages(Biostrings))
 
+#select start and end positions
+str <- 9478
+end <- 9498
+
+#set the mismatch tolerance for the bowtie alligner
+mismatch <- 0
+
+#read .fasta reference and .fastq data
 replicon_ref<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
 input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
 
