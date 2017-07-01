@@ -14,7 +14,8 @@ Samtools      | >=1.3.1
 Bedtools      | >=2.17.0
 
 ## Configuration 
-Open and edit the script variables acording to your preferences.
+Open the *stable.r* using a standart text editor of your choice.
+Edit the script variables acording to your preferences and based on the comments provided.
 
 - Set the start and finish nucleotide positions in between which the graphs will be plotted. 
 	- To do that edit the "str" and "end" variables and set them to the specific nucleotide positions in the reference sequence you provide.
@@ -30,7 +31,7 @@ Open and edit the script variables acording to your preferences.
 
 ## Usage 
 You will need to have in the same directory the following files:
-- The RACE-SEQ lite script downloded and edited as stated above
+- The RACE-SEQ lite *stable.r* script downloded and edited as stated above
 - Only one sequencing data file in .fastq format
 - Only one reference sequence file in .fasta format
   
