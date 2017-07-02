@@ -10,7 +10,7 @@ packages<-function(x){
 suppressMessages(packages(Biostrings))
 
 #set output name prefix
-prefix<- "your_file_name_here"
+prefix<- "bowtie"
 
 #select start and end positions
 str<- 9478
@@ -19,23 +19,22 @@ end<- 9498
 #set the mismatch tolerance for the bowtie alligner
 mismatch<- 0
 
-#read the original wildtype reference
-replicon_ref<- list.files(".", pattern =".fasta", all.files = F, full.names = F)
-
-#input the data in .fastq or .fastq.gz format
+#read .fasta reference and .fastq data
+replicon_ref<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
 input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
 
-#read nucleotide reference and convert to character string
-nt<-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
-nt<- data.frame(lapply(nt, function(x) toupper(x)), stringsAsFactors = F)
+#reading and transforming reference sequence
+nt_reference <-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
+nt_reference<- data.frame(lapply(nt_reference, function(x) toupper(x)), stringsAsFactors = F)
 
-#set output names
-filename <- paste(mismatch, "mm", sep="")
-out_name <- paste("read_count_", filename, ".txt", sep="")
-csv_name <- paste("CSV_",prefix, "_", filename, ".csv", sep="")
-csv_br_name <- paste("CSV_",prefix, "_", filename, "_region.csv", sep="")
+#set output name
+filename <- paste("mm", mismatch, sep = "")
+out_name <- paste("read_count_", filename, sep="")
 
 #build the index and perform alignment with bowtie and read count using bedtools
+  
+print(paste0("Performing alignment with ", mismatch, " mismatch using bowtie"))
+
 CMD_bowindex<- paste("bowtie-build -q -f", replicon_ref, "index", sep=" ")
 system(CMD_bowindex)
 
@@ -51,8 +50,12 @@ dataframe[,5] <- (dataframe[,3]/sum(dataframe[,3])*100)
 dataframe[,6] <- (log10(dataframe[,3]))
 dataframe[dataframe== -Inf] <-0
 
-write.table(dataframe, file = csv_name , sep = "\t",col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),row.names = F )
-write.table(dataframe[str:end,], file = csv_br_name , sep = "\t",col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),row.names = F )
+#focusing on target region can be ajusted acording to experiment
+binding_region <- dataframe[str:end,]
+
+#write.table(dataframe, file = paste0(prefix, "_", filename, "_whole.csv") , sep = "\t",col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),row.names = F )
+write.table(binding_region, file = paste0(prefix, "_", filename, ".csv") , sep = "\t",
+            col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ), row.names = F )
 
 #remove read_count and index file created
 counts<- list.files(".", pattern="read_count", all.files = F, full.names = F)

@@ -10,11 +10,14 @@ packages <- function(x) {
 #List of required libraries to be loaded
 suppressMessages(packages(Biostrings))
 
+#set output name prefix
+prefix<- "tmap"
+
 #select start and end positions
 str <- 9478
 end <- 9498
 
-#set the mismatch tolerance for the bowtie alligner
+#set the mismatch tolerance for the tmap alligner
 mismatch <- 0
 
 #read .fasta reference and .fastq data
