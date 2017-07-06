@@ -12,7 +12,6 @@ packages<-function(x){
 }
 #List of required libraries to be loaded
 suppressMessages(packages(Biostrings))
-suppressMessages(packages(tools))
 
 #set output name prefix
 prefix<- "YOUR_DATASET_HERE"
