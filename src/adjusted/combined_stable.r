@@ -18,17 +18,20 @@ option_list<- list(
   make_option(c("-e", "--end"), type="integer", action = "store" ,default = NA,
               help="Input the end nucleotide position"),
 
+  make_option(c("-a", "--adapter"), type="character", action = "store" ,default = NA,
+              help="Input the RACE adapter sequence [default: NO_trimming]"),
+
   make_option(c("-m", "--mismatch"), type="integer", default = 0,
               help="Input number of mismatches during alignement [default: %default]"),
 
   make_option(c("-p", "--plot"), action="store_true", default = FALSE,
-              help="Print output graph plot [default: %NO]"),
+              help="Print output graph plot [default: NO]"),
 
   make_option(c("-t", "--tmap"), action="store_true", default = FALSE,
-              help="Use tmap aligner instead of bowtie [default: %BOWTIE]"),
+              help="Use tmap aligner instead of bowtie [default: BOWTIE]"),
   
   make_option(c("--no_csv"), action="store_true", default = FALSE ,
-              help="Do not print output CSV file [default: %<filename.csv>]")
+              help="Do not print output CSV file [default: <filename.csv>]")
   
 )
 
@@ -41,6 +44,7 @@ opt = parse_args(OptionParser(usage = "Usage: %prog [options] -s <integer> -e <i
 str<- opt$s
 end<- opt$e
 mismatch<- opt$mismatch
+RACE_adapter<- opt$a
 
 if(!is.na(opt$s) & !is.na(opt$e)) {
   #input the reference sequence in .fasta format
@@ -68,39 +72,55 @@ if(!is.na(opt$s) & !is.na(opt$e)) {
 nt_reference <-strsplit((toString(readBStringSet(replicon_ref))), NULL , fixed = T)
 nt_reference<- data.frame(lapply(nt_reference, function(x) toupper(x)), stringsAsFactors = F)
 
+#set output names
+filename <- paste("mm", mismatch, sep = "")
+out_name <- paste("read_count_", filename, sep="")
+
 if (opt$t==TRUE){
   
   prefix<-"tmap"
-  
-  #set output name
-  filename <- paste("mm", mismatch, sep = "")
-  out_name <- paste("read_count_", filename, sep="")
-  
-  #build the index and perform alignment with tmap and read count using bedtools
-  
-  print(paste0("Performing alignment with ", mismatch, " mismatch using tmap"))
-  
+
+  #build the index
   CMD_tmapindex<- paste("tmap index -f", replicon_ref , sep=" ")
   system(CMD_tmapindex)
-  
-  CMD_tmap<- paste("tmap map1 -a 0 -g 3 --max-mismatches ",mismatch," -f ", replicon_ref," -r ", input_data, " | samtools view -bt replicon.fasta - | genomeCoverageBed -d -5 -ibam stdin > ",out_name, sep="")
+
+  #perform alignment with tmap and read count using bedtools
+  if (is.na(opt$a)){
+    
+    #no adapter trimming
+    print(paste0("Performing alignment with ", mismatch, " mismatch using tmap"))
+    CMD_tmap<- paste("tmap map1 -a 0 -g 3 --max-mismatches ",mismatch," -f ", replicon_ref," -r ", input_data, " | samtools view -bt ", replicon_ref," - | genomeCoverageBed -d -5 -ibam stdin > ",out_name, sep="")
   system(CMD_tmap)
+  } else {
+    
+    #adapter trimming using cutadapt
+    print(paste0("Performing adapter trimming and alignment with ", mismatch, " mismatch using tmap"))
+    CMD_tmap<- paste("cutadapt -g ", RACE_adapter, " -e0 --no-indels -m10 --discard-untrimmed --quiet ", input_data," |tmap map1 -a 0 -g 3 --max-mismatches ",mismatch," -f ", replicon_ref," -i fastq | samtools view -bt ", replicon_ref," - | genomeCoverageBed -d -5 -ibam stdin > ",out_name, sep="")
+    system(CMD_tmap) 
+  }
 } else {
   
   prefix<-"bowtie"
-  
-  #set output name
-  filename <- paste("mm", mismatch, sep = "")
-  out_name <- paste("read_count_mm", mismatch, sep="")
-  
-  #build the index and perform alignment with bowtie and read count using bedtools
-  print(paste0("Performing alignment with ", mismatch, " mismatch using bowtie"))
-  
+   
+  #build the index 
   CMD_bowindex<- paste("bowtie-build -q -f", replicon_ref, "index", sep=" ")
   system(CMD_bowindex)
-  
-  CMD_bow<- paste("bowtie -p 2 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
+
+  #perform alignment with bowtie and read count using bedtools
+  if (is.na(opt$a)){
+    
+    #no adapter trimming
+    print(paste0("Performing alignment with ", mismatch, " mismatch using bowtie"))
+    CMD_bow<- paste("bowtie -p 2 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
   system(CMD_bow)
+
+  } else {
+    
+    #adapter trimming using cutadapt
+    print(paste0("Performing adapter trimming and alignment with ", mismatch, " mismatch using bowtie"))
+    CMD_bow<- paste("cutadapt -g", RACE_adapter, "-e0 --no-indels -m10 --discard-untrimmed --quiet ", input_data,"|bowtie -p 8 -S -k 1 -v", mismatch, "index - | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
+    system(CMD_bow)
+  }
 }
 
 #read and merge ref and reads
