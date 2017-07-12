@@ -31,7 +31,10 @@ option_list<- list(
               help="Use tmap aligner instead of bowtie [default: BOWTIE]"),
   
   make_option(c("--no_csv"), action="store_true", default = FALSE ,
-              help="Do not print output CSV file [default: <filename.csv>]")
+              help="Do NOT print CSV covering binding region [default: <.csv>]"),
+  
+  make_option(c("--whole_ref"), action="store_true", default = FALSE ,
+              help="Print CSV covering whole replicon [default: <replicon.csv>]")
   
 )
 
@@ -111,7 +114,7 @@ if (opt$t==TRUE){
     
     #no adapter trimming
     print(paste0("Performing alignment with ", mismatch, " mismatch using bowtie"))
-    CMD_bow<- paste("bowtie -p 2 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
+    CMD_bow<- paste("bowtie -p 8 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
   system(CMD_bow)
 
   } else {
@@ -164,6 +167,12 @@ for(i in index_files ){
 
 if (opt$no_csv==FALSE){
 write.table(binding_region, file = paste0(prefix, "_", filename, ".csv") , sep = "\t",
+            col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),
+            row.names = F )
+}
+
+if (opt$whole_ref==TRUE){
+write.table(dataframe, file = paste0(prefix, "_", filename, "_whole_ref.csv") , sep = "\t",
             col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),
             row.names = F )
 }
