@@ -7,7 +7,9 @@ packages <- function(x) {
     require(x, character.only = TRUE)
   }
 }
+
 #List of required libraries to be loaded
+suppressMessages(packages(tools))
 suppressMessages(packages(optparse))
 suppressMessages(packages(Biostrings))
 
@@ -35,17 +37,17 @@ option_list<- list(
   
 )
 
-opt = parse_args(OptionParser(description = "RACE-SEQ-lite 
-                              \nThis is a custom R script for the downstream analysis of RACE-seq data. 
-                              \nThe pipeline uses common bioinformatics command line packages such as BOWTIE, SAMTOOLS and BEDTOOLS that should be installed system-wide.
-                              \nThe script reads the necessary input files from your workind directory and outputs a graph or a csv file. 
-                              \nOne fasta and one fastq file can only be in the working directory",
+opt = parse_args(OptionParser(description = "RACE-SEQ-lite\n
+This is a custom R script for the downstream analysis of RACE-seq data.\n
+The pipeline uses common bioinformatics command line packages such as BOWTIE, SAMTOOLS and BEDTOOLS that should be installed system-wide.\n
+The script reads the necessary input files from your workind directory and outputs a graph or a csv file.\n
+One fasta and one fastq file can only be in the working directory",
                               usage = "Rscript %prog [options] -s <integer> -e <integer> -m <integer> \n",
                               option_list = option_list,
                               add_help_option = TRUE,
-                              epilogue = "Thank you for using RACE-SEQ lite. 
-                              \nFor documentation visit: https://github.com/pantastheo/RACE-SEQ-lite. 
-                              \nAuth: Pantazis Theotokis 2018 
+                              epilogue = "Thank you for using RACE-SEQ lite.
+                              \nFor documentation visit: https://github.com/pantastheo/RACE-SEQ-lite.
+                              \nAuth: Pantazis Theotokis 2018
                               \nContact: p.theotokis@imperial.ac.uk
                               \n"))
 
@@ -57,36 +59,34 @@ RACE_adapter<- opt$a
 
 if(!is.na(opt$s) & !is.na(opt$e)) {
   #input the reference sequence in .fasta format
-  refname<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
-    if ((length(refname))==0) {
+  reference<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
+    if ((length(reference))==0) {
       stop("No input .fasta reference file available in working directory.")
-    } else if ((length(refname))>=2) {
+    } else if ((length(reference))>=2) {
       stop("More than one .fasta reference file in working directory.")
-    } else if ((length(refname))==1) {
-      reference<- as.character(refname)
-    } 
+    }
 
   #input the data in .fastq or .fastq.gz format
-  data_fastq<- list.files(".", pattern="fastq", all.files = F, full.names = F)
-    if ((length(data_fastq))==0) {
+  input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
+    if ((length(input_data))==0) {
       stop("No input .fastq file available in working directory.")
-    } else if ((length(data_fastq))>=2) {
+    } else if ((length(input_data))>=2) {
       stop("More than one .fastq file in working directory. For paired end reads please concatenate and run again")
-    } else if ((length(data_fastq))==1) {
-      input_data<- data_fastq
     } 
-}else {stop("Please input Start and End nucleotide reference genomic locations \nOr type [option] -h for help")}
+}else 
+  stop("Please input Start and End nucleotide reference genomic locations \nOr type [option] -h for help")
 
 #reading and transforming reference sequence
 nt_reference <-strsplit((toString(readBStringSet(reference))), NULL , fixed = T)
 nt_reference<- data.frame(lapply(nt_reference, function(x) toupper(x)), stringsAsFactors = F)
 
 #set output names
+input_name<- file_path_sans_ext(input_data)
 filename <- paste("mm", mismatch, sep = "")
 out_name <- paste("read_count_", filename, sep="")
 
 if (opt$t==TRUE){
-  if (system("which tmap",show.output.on.console = F  )==0) {
+  if (system("which tmap")==0) {
   prefix<-"tmap"
   #build the index
   CMD_tmapindex<- paste("tmap index -f", reference , sep=" ")
@@ -100,7 +100,7 @@ if (opt$t==TRUE){
     CMD_tmap<- paste("tmap map1 -a 0 -g 3 --max-mismatches ",mismatch," -f ", reference," -r ", input_data, " | samtools view -bt ", reference," - | genomeCoverageBed -d -5 -ibam stdin > ",out_name, sep="")
     system(CMD_tmap)
   } else {
-    if (system("which cutadapt",show.output.on.console = F )==0){
+    if (system("which cutadapt")==0){
     #adapter trimming using cutadapt
     print(paste0("Performing adapter trimming and alignment with ", mismatch, " mismatch using tmap"))
     CMD_tmap<- paste("cutadapt -g ", RACE_adapter, " -e0 --no-indels -m10 --discard-untrimmed --quiet ", input_data," |tmap map1 -a 0 -g 3 --max-mismatches ",mismatch," -f ", reference," -i fastq | samtools view -bt ", reference," - | genomeCoverageBed -d -5 -ibam stdin > ",out_name, sep="")
@@ -116,7 +116,7 @@ if (opt$t==TRUE){
   
 } else {
   
-  if (system("which bowtie",show.output.on.console = F )==0) {
+  if (system("which bowtie")==0) {
   prefix<-"bowtie"
   #build the index 
   CMD_bowindex<- paste("bowtie-build -q -f", reference, "index", sep=" ")
@@ -129,7 +129,7 @@ if (opt$t==TRUE){
     CMD_bow<- paste("bowtie -p 2 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
     system(CMD_bow)
   } else {
-    if (system("which cutadapt",show.output.on.console = F )==0) {
+    if (system("which cutadapt")==0) {
     #adapter trimming using cutadapt
     print(paste0("Performing adapter trimming and alignment with ", mismatch, " mismatch using bowtie"))
     CMD_bow<- paste("cutadapt -g", RACE_adapter, "-e0 --no-indels -m10 --discard-untrimmed --quiet ", input_data,"|bowtie -p 8 -S -k 1 -v", mismatch, "index - | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
@@ -165,14 +165,14 @@ del_files<- function(pattern){
   }
 }
 
-del_files("read_counts")
+del_files("read_count")
 del_files("fasta.tmap.")
 del_files("aligned.bam")
 del_files("out.sam")
 del_files("index")
 
 if (opt$no_csv==FALSE){
-write.table(binding_region, file = paste0(prefix, "_", filename, ".csv") , sep = "\t",
+write.table(binding_region, file = paste0(input_name,"_",prefix, "_", filename, ".csv") , sep = "\t",
             col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),
             row.names = F )
 }
@@ -180,7 +180,7 @@ write.table(binding_region, file = paste0(prefix, "_", filename, ".csv") , sep =
 
 if (opt$p==TRUE){
 #create wildtype linear & log scale graph
-pdf(paste0(prefix, "_", filename, ".pdf"), width=15)
+pdf(paste0(input_name,"_",prefix, "_", filename, ".pdf"), width=15)
     
 #in 100% linear scale
 mp <- barplot(binding_region[,5],
