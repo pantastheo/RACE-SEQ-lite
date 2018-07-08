@@ -1,4 +1,6 @@
 
+print(paste0("Loading R packages"))
+
 #Function to download, install and load the required libraries only when needed
 packages <- function(x) {
   x <- as.character(match.call()[[2]])
@@ -8,7 +10,10 @@ packages <- function(x) {
   }
 }
 
-print(paste0("Loading R packages"))
+#List of required libraries to be loaded
+source("https://bioconductor.org/biocLite.R")
+if (!ShortRead %in% installed.packages()) biocLite(ShortRead)
+if (!Biostrings %in% installed.packages()) biocLite(Biostrings)
 #List of required libraries to be loaded
 suppressMessages(packages(tools))
 suppressMessages(packages(optparse))
@@ -18,7 +23,7 @@ suppressMessages(packages(stringi))
 suppressMessages(packages(ggplot2))
 suppressMessages(packages(cowplot))
 
-
+#List of pasring options loaded
 option_list<- list(
   make_option(c("-s", "--start"), type="integer", action = "store", default = NA,
               help="Input the first nucleotide reference genomic location."),
@@ -27,7 +32,7 @@ option_list<- list(
               help="Input the last nucleotide reference genomic location."),
 
   make_option(c("-a", "--adapter"), type="character", action = "store" ,default = NA,
-              help="Input the RACE adapter nucleotide sequence. [default: no_trimming]"),
+              help="Input the RACE adapter nucleotide sequence. [default: NO]"),
 
   make_option(c("-m", "--mismatch"), type="integer", default = 0,
               help="Input number of mismatches that are allowed during alignement. [default: %default]"),
@@ -36,10 +41,10 @@ option_list<- list(
               help="Print output graph between the specified genomic locations. [default: NO]"),
 
   make_option(c("-t", "--tmap"), action="store_true", default = FALSE,
-              help="Use the Tmap aligner instead of Bowtie. [default: BOWTIE]"),
+              help="Use the Tmap aligner instead of Bowtie. [default: NO]"),
   
   make_option(c("--no_csv"), action="store_true", default = FALSE ,
-              help="Do not print output CSV file. [default: <filename.csv>]"),
+              help="Do not print output CSV file. [default: NO]"),
   
   make_option(c("-i", "--iterate"), action="store_true", default= FALSE,
               help="Create the alternative references to cover all the possible SNPs \n
@@ -69,7 +74,9 @@ mismatch<- opt$mismatch
 RACE_adapter<- opt$a
 
 
-
+#Check if the necessary fasta and fastq files are located in the working directory.
+#If TRUE load read the files.
+#If FALSE exit with a message.
 if(!is.na(opt$s) & !is.na(opt$e)) {
   #input the reference sequence in .fasta format
   reference<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
@@ -90,6 +97,7 @@ if(!is.na(opt$s) & !is.na(opt$e)) {
 } else 
   stop("Please input Start and End nucleotide reference genomic locations \nOr type [option] -h for help")
 
+#If iterate option is TRUE run the script that will generate all the alternative references and will perform alignment.
 if (opt$i==FALSE){
   
 #reading and transforming reference sequence
@@ -101,7 +109,9 @@ input_name<- file_path_sans_ext(input_data)
 filename <- paste("mm", mismatch, sep = "")
 out_name <- paste("read_count_", filename, sep="")
 
+#If tmap TRUE perform alignmment using TMAP
 if (opt$t==TRUE){
+  #check if the tmap aligner is installed
   if (system("which tmap")==0) {
   print(paste0("Generating tmap index files"))
   prefix<-"tmap"
@@ -117,6 +127,7 @@ if (opt$t==TRUE){
     CMD_tmap<- paste("tmap map1 -a 0 -g 3 --max-mismatches ",mismatch," -f ", reference," -r ", input_data, " | samtools view -bt ", reference," - | genomeCoverageBed -d -5 -ibam stdin > ",out_name, sep="")
     system(CMD_tmap)
   } else {
+    #Check if cutadapt installed and perform adapter trimming
     if (system("which cutadapt")==0){
     #adapter trimming using cutadapt
     print(paste0("Performing adapter trimming and alignment with ", mismatch, " mismatch using tmap"))
@@ -129,6 +140,8 @@ if (opt$t==TRUE){
     stop("Tmap software is not installed or not in $PATH. Please see documentation for installation.")}
 } 
 else {
+  #If tmap FALSE perform alignment using bowtie, which is the default option.
+  #check if bowtie aligner is installed
   if (system("which bowtie")==0) {
   print(paste0("Generating bowtie index files"))
   prefix<-"bowtie"
@@ -166,7 +179,7 @@ dataframe[dataframe== -Inf] <-0
 #focusing on target region can be ajusted acording to experiment
 binding_region <- dataframe[str:end,]
 
-#remove read_count and index file created
+#function to delete files created
 del_files<- function(pattern){
   fl_rm<-list.files(".", pattern = pattern, all.files = F, full.names = F)
   for(i in fl_rm){
@@ -174,13 +187,14 @@ del_files<- function(pattern){
     system(i)
   }
 }
-
+#delete generated files using fuunction
 del_files("read_count")
 del_files("fasta.tmap.")
 del_files("aligned.bam")
 del_files("out.sam")
 del_files("index")
 
+#print the wildtype alignment in csv format table
 if (opt$no_csv==FALSE){
 write.table(binding_region, file = paste0(input_name,"_",prefix, "_", filename, ".csv") , sep = "\t",
             col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),
@@ -359,22 +373,25 @@ dev.off()
   #extract the wildtype siRNA sequence
   siRNA_ref <- subseq((replicon_str), start = str, end = end)
   
+  #check if packages are installed on system
+  #If not exit with a message
   if (system("which bowtie")==0) {
     print("Bowtie aligner installed and on $PATH")} 
   else {stop("Bowtie software is not installed or not in $PATH. Please see documentation for installation.")}
   if (opt$t==TRUE){
     if (system("which tmap")==0) {
-    print("Tmap aligner installed and on $PATH")}
+      print("Tmap aligner installed and on $PATH")}
     else {stop("Tmap software is not installed or not in $PATH. Please see documentation for installation.")}}
-  if (system("which cutadapt")==0) {
-    print("Cutadapter trimmer installed and on $PATH")}
-  else {stop("Cutadapt software is not installed or not in $PATH. Please see documentation for installation.")}
+  if (opt$a==TRUE){
+    if (system("which cutadapt")==0) {
+      print("Cutadapter trimmer installed and on $PATH")}
+    else {stop("Cutadapt software is not installed or not in $PATH. Please see documentation for installation.")}}
   
   
   
   #set the counter
   counter <- 100
-  #run the stable.r script for mismatch references in loop
+  #run the script for mismatch references in loop
   for (i in target$target) {
     print(paste("working on alignment",counter - 99 ,"of",length(target$target)))
     
@@ -438,7 +455,7 @@ dev.off()
     dataframe_log10 <-data.frame(dataframe_log10, (log10(reads[, 3])), stringsAsFactors = F)
     dataframe_linear <-data.frame(dataframe_linear, (reads[, 3] / sum(reads[, 3]) * 100), stringsAsFactors = F)
     
-    #remove read_count and index file created
+    #function to delete read_count and index file created
     del_files<- function(pattern){
       fl_rm<-list.files(".", pattern = pattern, all.files = F, full.names = F)
       for(i in fl_rm){
@@ -446,11 +463,12 @@ dev.off()
         system(i)
       }
     }
-    
+    #delete files generated during alignment
     del_files("read_count")
     del_files("index")
     del_files(new_fasta_ref)
     
+    #remove R environment variables
     rm(reads)
     rm(sub_ref)
     rm(mm_ref)
@@ -497,8 +515,6 @@ dev.off()
   if (opt$p==TRUE){
     #create wildtype linear & log scale graph
     pdf(paste0(input_name,"_",prefix, "_", filename, ".pdf"), width=20)
-    #pdf("new.pdf", width = 20)
-    #c("reference", "position", "count", "nucleotide", "percentage", "log10" )
     
     #in 100% linear scale
     mp <- barplot(binding_region[,3],
