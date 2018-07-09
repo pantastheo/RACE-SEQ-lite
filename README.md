@@ -70,19 +70,22 @@ The latest TMAP is unsupported. To use a supported version, please see the TMAP 
 To download and install system wide please follow the instructions on their official repository:
 (https://github.com/iontorrent/TS/tree/master/Analysis/TMAP)
 
+#### R
+To run the RACE-SEQ-lite script you will need to have an R version ( >=3.4) installed on your system. All the necessary R packages will get installed and loaded automatically.
 
 ## Scripts
 
-There are two simple scripts for RACE-seq analysis
+There is one main script for the RACE-seq analysis
 
- - *stable.r* is a simple R script that uses the Cutadapt, Bowtie, Samtools and Bedtools packages and the command options need to be edited manually in the file.
+ - *RACEseqMM.r* is an optimized R script that combines and configures all the necessary command line packages in a complete pipeline solution. The script will get all the configuration options as command line parameters parsed with Rscript.
 
- - *combined_stable.r* is an optimized version of the stable.r script that parses command line arguments when run with Rscript. This script incorporates the Tmap aligner that can be invoked optionally. 
+In the *legacy_scripts* folder you can find the vanilla RACE-SEQ-lite script *stable.r*.
+ - *stable.r* is a simple R script that uses the Cutadapt, Bowtie, Samtools and Bedtools packages and the configuration options need to be edited manually in the file. 
 
 ## Usage 
 
 To use the **stable.r** you will need to have in the same directory the following files:
-- The RACE-SEQ lite *stable.r* script downloded and edited.
+- The RACE-SEQ-lite *stable.r* script downloded and edited.
 - Only one sequencing data file in .fastq format.
 - Only one reference sequence file in .fasta format.
 
@@ -96,24 +99,26 @@ To run the *stable.r* you can either use Rscript from the command line or run it
 
 ## Usage 
 
-To use the **combined_stable.r** you will need to run it using Rscript from the command line
+To use the **RACEseqMM.r** you will need to run it using Rscript from the command line
 ```
-Rscript combined_stable.r
+Rscript RACEseqMM.r
 ```
 To get information and help about the script use option *--help* or *-h*
 ```
-Rscript combined_stable.r --help
+Rscript RACEseqMM.r --help
 ```
 
-Options        | Description
--------------- | --------------
--s, --start    | "Input the start nucleotide position"
--e, --end      | "Input the end nucleotide position"
--a, --adapter  | "Input the RACE adapter sequence [default: NO_trimming]"
--m, --mismatch | "Input number of mismatches during alignement [default: %default]"
--p, --plot     | "Print output graph plot [default: NO]"
--t, --tmap     | "Use tmap aligner instead of bowtie [default: BOWTIE]"
---nocsv        | "Do not print output CSV file [default: <filename.csv>]"
+Options           | Description
+----------------- | --------------
+-s, --start       | "Input the start nucleotide position"
+-e, --end         | "Input the end nucleotide position"
+-a, --adapter     | "Input the RACE adapter sequence [default: NO_trimming]"
+-m, --mismatch    | "Input number of mismatches during alignement [default: %default]"
+-p, --plot        | "Print output graph plot [default: NO]"
+-t, --tmap        | "Use tmap aligner instead of bowtie [default: NO]"
+--nocsv           | "Do not print output CSV file [default: NO]"
+-i, --iterate     | "Create the alternative references to cover all the possible SNPs of the reference between the genomics locations specified by -s and -e and then perform global alignment and generate graph.[default: NO]"
+-h, --help        | "Print this help page"              
 
 
 
