@@ -12,8 +12,8 @@ packages <- function(x) {
 
 #List of required libraries to be loaded
 source("https://bioconductor.org/biocLite.R")
-if (!ShortRead %in% installed.packages()) biocLite(ShortRead)
-if (!Biostrings %in% installed.packages()) biocLite(Biostrings)
+if (!"ShortRead" %in% installed.packages()) biocLite(ShortRead)
+if (!"Biostrings" %in% installed.packages()) biocLite(Biostrings)
 #List of required libraries to be loaded
 suppressMessages(packages(tools))
 suppressMessages(packages(optparse))
@@ -43,8 +43,8 @@ option_list<- list(
   make_option(c("-t", "--tmap"), action="store_true", default = FALSE,
               help="Use the Tmap aligner instead of Bowtie. [default: NO]"),
   
-  make_option(c("--no_csv"), action="store_true", default = FALSE ,
-              help="Do not print output CSV file. [default: NO]"),
+  make_option(c("--notsv"), action="store_true", default = FALSE ,
+              help="Do not write output tsv file. [default: NO]"),
   
   make_option(c("-i", "--iterate"), action="store_true", default= FALSE,
               help="Create the alternative references to cover all the possible SNPs \n
@@ -56,7 +56,7 @@ option_list<- list(
 opt = parse_args(OptionParser(description = "RACE-SEQ-lite\n
 This is a custom R script for the downstream analysis of RACE-seq data.\n
 The pipeline uses common bioinformatics command line packages such as BOWTIE, SAMTOOLS and BEDTOOLS that should be installed system-wide.\n
-The script reads the necessary input files from your workind directory and outputs a graph or a csv file.\n
+The script reads the necessary input files from your workind directory and outputs a graph or a tsv file.\n
 One fasta and one fastq file can only be in the working directory",
                               usage = "Rscript %prog [options] -s <integer> -e <integer> -m <integer> \n",
                               option_list = option_list,
@@ -80,7 +80,9 @@ RACE_adapter<- opt$a
 if(!is.na(opt$s) & !is.na(opt$e)) {
   #input the reference sequence in .fasta format
   reference<- list.files(".", pattern ="fasta", all.files = F, full.names = F)
-  print(paste0("Reading reference file in fasta format.File " ,reference, " found in working directory."))
+  print(paste0("Reading reference file in fasta format."))
+  print(paste0("File " ,reference, " found in working directory."))
+  
     if ((length(reference))==0) {
       stop("No input .fasta reference file available in working directory.")} else if ((length(reference))>=2) {
       stop("More than one .fasta reference file in working directory.")
@@ -88,11 +90,12 @@ if(!is.na(opt$s) & !is.na(opt$e)) {
 
   #input the data in .fastq or .fastq.gz format
   input_data<- list.files(".", pattern="fastq", all.files = F, full.names = F)
-  print(paste0("Reading data input file in fastq format.File " ,input_data, " found in working directory."))
+  print(paste0("Reading data input file in fastq format."))
+  print(paste0("File " ,input_data, " found in working directory."))
     if ((length(input_data))==0) {
       stop("No input .fastq file available in working directory.")
     } else if ((length(input_data))>=2) {
-      stop("More than one .fastq file in working directory. For paired end reads please concatenate and run again")
+      stop("More than one .fastq file in working directory. \nFor paired end reads please concatenate and run again")
     } 
 } else 
   stop("Please input Start and End nucleotide reference genomic locations \nOr type [option] -h for help")
@@ -194,9 +197,10 @@ del_files("aligned.bam")
 del_files("out.sam")
 del_files("index")
 
-#print the wildtype alignment in csv format table
-if (opt$no_csv==FALSE){
-write.table(binding_region, file = paste0(input_name,"_",prefix, "_", filename, ".csv") , sep = "\t",
+#print the wildtype alignment in tsv format table
+if (opt$notsv==FALSE){
+print(paste0("Writing results to output tsv"))
+write.table(binding_region, file = paste0(input_name,"_",prefix, "_", filename, ".tsv") , sep = "\t",
             col.names = c("reference", "position", "count", "nucleotide", "percentage", "log10" ),
             row.names = F )
 }
@@ -204,7 +208,7 @@ write.table(binding_region, file = paste0(input_name,"_",prefix, "_", filename, 
 if (opt$p==TRUE){
 #create wildtype linear & log scale graph
 pdf(paste0(input_name,"_",prefix, "_", filename, ".pdf"), width=20)
-    
+print(paste0("Generating graph with ",mismatch," mismatches."))
 #in 100% linear scale
 mp <- barplot(binding_region[,5],
               xlab="Binding site", 
@@ -377,15 +381,21 @@ dev.off()
   #If not exit with a message
   if (system("which bowtie")==0) {
     print("Bowtie aligner installed and on $PATH")} 
-  else {stop("Bowtie software is not installed or not in $PATH. Please see documentation for installation.")}
-  if (opt$t==TRUE){
+  else {stop("Bowtie software is not installed or not on $PATH. Please see documentation for installation.")}
+  if (opt$t==TRUE ){
     if (system("which tmap")==0) {
       print("Tmap aligner installed and on $PATH")}
-    else {stop("Tmap software is not installed or not in $PATH. Please see documentation for installation.")}}
-  if (opt$a==TRUE){
+    else if (system("which tmap")==1) {
+      print(paste0("Tmap software is not installed or not on $PATH."))
+      stop("Please see documentation for installation.")}
+    }
+  if (!is.na(opt$a)){
     if (system("which cutadapt")==0) {
       print("Cutadapter trimmer installed and on $PATH")}
-    else {stop("Cutadapt software is not installed or not in $PATH. Please see documentation for installation.")}}
+    else if (system("which Cutadapt")==1){
+      print(paste0("Cutadapt trimmer is not installed or not on $PATH."))
+      stop("Please see documentation for installation.")}
+    }
   
   
   
@@ -506,16 +516,16 @@ dev.off()
   binding_region[binding_region == -Inf] <- 0
   colnames(binding_region) <- c("nucleotide", "counts", "linear", "log10")
   
-  #write log10 siRNA region in .csv
-  if (opt$no_csv==FALSE){
-    write.table(binding_region, file = paste0(input_name,"_", filename, ".csv"),sep = "\t",quote = F,row.names = F)
-    binding_region <- read.csv("siRNA22_1_mm0.csv", sep = "\t")
+  #write log10 siRNA region in .tsv
+  if (opt$notsv==FALSE){
+    write.table(binding_region, file = paste0(input_name,"_", filename, ".tsv"),sep = "\t",quote = F,row.names = F)
+    #binding_region <- read.table("siRNA22_1_mm0.tsv", sep = "\t", quote = F, row.names = F, header = T)
   }
   
   if (opt$p==TRUE){
     #create wildtype linear & log scale graph
     pdf(paste0(input_name,"_",prefix, "_", filename, ".pdf"), width=20)
-    
+    print(paste0("Generating wildtype graph with ",mismatch," mismatches."))
     #in 100% linear scale
     mp <- barplot(binding_region[,3],
                   xlab="Binding site", 
@@ -549,6 +559,8 @@ dev.off()
   
   
   #ggplot2 graph function
+  print(paste0("Generating multiplot with ",mismatch," mismatches."))
+  
   plot_RACEseq<- function(N){
     
     N[,1]<- as.character(N[,1])
@@ -597,10 +609,10 @@ dev.off()
     si15 <- ggraph4(N, 45, 15)
     
     plot2_8<- plot_grid(si02, si03, si04, si05, si06, si07, labels = "AUTO", label_size = 14 , hjust = 0, ncol = 2)
-    ggsave(filename=paste0(input_name,"_plot_seed.pdf"), plot = plot2_8, scale = 1.8 )
+    ggsave(filename=paste0(input_name,"_multiplot_seed_mm",mismatch,".pdf"), plot = plot2_8, scale = 1.8 )
     
     plot9_12<- plot_grid(si09, si10, si11, si12, labels = "AUTO", label_size = 14 , hjust = 0)
-    ggsave(filename=paste0(input_name,"_plot_cleave.pdf"), plot = plot9_12, scale = 0.8, width= 20.4 ,height = 7.8 )
+    ggsave(filename=paste0(input_name,"_multiplot_cleavage_mm",mismatch,".pdf"), plot = plot9_12, scale = 0.8, width= 20.4 ,height = 7.8 )
   }
   plot_RACEseq(N)
 }
