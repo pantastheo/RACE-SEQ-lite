@@ -9,14 +9,14 @@ packages <- function(x) {
     require(x, character.only = TRUE)
   }
 }
-
+#move optparse to the top to load opts first
+suppressMessages(packages(optparse))
 #List of required libraries to be loaded
 source("https://bioconductor.org/biocLite.R")
 if (!"ShortRead" %in% installed.packages()) biocLite(ShortRead)
 if (!"Biostrings" %in% installed.packages()) biocLite(Biostrings)
 #List of required libraries to be loaded
 suppressMessages(packages(tools))
-suppressMessages(packages(optparse))
 suppressMessages(packages(ShortRead))
 suppressMessages(packages(Biostrings))
 suppressMessages(packages(stringi))
@@ -156,13 +156,13 @@ else {
   if (is.na(opt$a)){
     #no adapter trimming
     print(paste0("Performing alignment with ", mismatch, " mismatch using bowtie"))
-    CMD_bow<- paste("bowtie -p 2 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
+    CMD_bow<- paste("bowtie -p 4 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
     system(CMD_bow)
   } else {
     if (system("which cutadapt")==0) {
     #adapter trimming using cutadapt
     print(paste0("Performing adapter trimming and alignment with ", mismatch, " mismatch using bowtie"))
-    CMD_bow<- paste("cutadapt -g", RACE_adapter, "-e0 --no-indels -m10 --discard-untrimmed --quiet ", input_data,"|bowtie -p 8 -S -k 1 -v", mismatch, "index - | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
+    CMD_bow<- paste("cutadapt -g", RACE_adapter, "-e0 --no-indels -m10 --discard-untrimmed --quiet ", input_data,"|bowtie -p 4 -S -k 1 -v", mismatch, "index - | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
     system(CMD_bow)
     }else {
       stop("Cutadapt software is not installed or not in $PATH. Please see documentation for installation.")}
@@ -451,12 +451,12 @@ dev.off()
         if (is.na(opt$a)){
           #no adapter trimming
           print(paste0("Performing alignment with ", mismatch, " mismatch using bowtie"))
-          CMD_bow<- paste("bowtie -p 2 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
+          CMD_bow<- paste("bowtie -p 4 -S -k 1 -v", mismatch, "index", input_data," | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
           system(CMD_bow)
            } else {
             #adapter trimming using cutadapt
             print(paste0("Performing adapter trimming and alignment with ", mismatch, " mismatch using bowtie"))
-            CMD_bow<- paste("cutadapt -g", RACE_adapter, "-e0 --no-indels -m10 --discard-untrimmed --quiet ", input_data,"|bowtie -p 8 -S -k 1 -v", mismatch, "index - | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
+            CMD_bow<- paste("cutadapt -g", RACE_adapter, "-e0 --no-indels -m10 --discard-untrimmed --quiet ", input_data,"|bowtie -p 4 -S -k 1 -v", mismatch, "index - | samtools view -bS - | genomeCoverageBed -d -5 -ibam stdin >", out_name, sep=" ")
             system(CMD_bow)}
       } 
     #read and merge ref and reads
