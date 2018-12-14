@@ -1,124 +1,75 @@
-## RACE-SEQ lite
+# RACE-SEQ-lite example run
 
-This is a custom R script for the downstream analysis of RACE-seq data.
+In this folder you will find all the necessary files to perform an example run of the **RACEseqMM.r** script.
+To run the example you will need to download or clone the *RACE-SEQ-lite* repository on your working directory.
+The example dataset is a fastq file containing short sequencing reads from a RACEseq experiment that have already been trimmed of the RACEseq adapter using the Cutadapt adapter trimming software.  
 
-## Dependencies
+## Example dataset
 
-The following command line toold must be installed on your UNIX machine.
+The only files you will need to perform an example run are the:
+- RACEseqMM.r
+- sample_data.fastq
+- sample_reference.fasta
 
-Package            | Version
---------------     | --------------
-Cutadapt (optional)| >=1.12
-Bowtie             | 1.0.0
-Samtools           | >=1.3.1
-Bedtools           | >=2.17.0
-Tmap (optional)    | >=3.4.1
+## Download 
 
-## Downloads
+Clone the Github repository which includes the example dataset on your system
 
-#### Cutadapt 
-
-Cutdapt is a tool writen in Python that is used for the trimmming of specific nucleotides sequences and adapters from high-throughput sequencing reads.
-Cutadapt helps with these trimming tasks by finding the adapter or primer sequences in an error-tolerant way. It can also modify and filter reads in various ways. 
-
-The easiest way to download and install Cutadapt system-wide is using the <b>pip</b> command.
-To install <b>pip</b> :
 ```
-sudo apt-get install python-pip
+cd /path/to/your/home/directory
 ```
-Then to install Cutadapt :
 ```
-sudo pip install cutadapt
+git clone https://github.com/pantastheo/RACE-SEQ-lite.git 
 ```
-For more information and troubleshooting please read Cutadapt documentation: (https://cutadapt.readthedocs.io/)
-
-#### Bowtie 
-
-Bowtie is an ultrafast, memory-efficient short read aligner. It aligns short DNA sequences to the human genome at a rate of over 25 million 35-bp reads per hour.
-
-To download and install Bowtie system-wide:
 ```
-sudo apt-get install bowtie
+cd src/example_data
 ```
-For specific versions and installation instructions please visit: (http://bowtie-bio.sourceforge.net/index.shtml)
+## Do a test run
 
-#### Samtools
-
-Samtools is a set of tools for high-throughput sequencing data manipulation. It also contains the libraries for several sequence and variant calling data formats.
-To download and install Samtolls sustem-wide:
-```
-sudo apt-get install samtools
-```
-For documentation please visit: (http://samtools.github.io/)
-
-#### Bedtools
-
-Bedtools is a powerful toolset for genome arithmetic and contains many utilities for a wide-range of genomics analysis tasks.
-
-To download and install bedtools system-wide :
-```
-sudo apt-get install bedtools
-```
-For documetation please visit: (http://bedtools.readthedocs.io/en/latest/)
-
-#### Tmap
-
-TMAP is a fast and accurate alignment software for short and long nucleotide sequences produced by next-generation sequencing technologies such as Ion Torrent PGM and Proton sequencers from ThermoFisher Scientific.
-The latest TMAP is unsupported. To use a supported version, please see the TMAP version associated with a Torrent Suite.
-*The download and use of the Tmap aligner is optional.*
-
-To download and install system wide please follow the instructions on their official repository:
-(https://github.com/iontorrent/TS/tree/master/Analysis/TMAP)
-
-#### R
-To run the RACE-SEQ-lite script you will need to have an R version ( >=3.4) installed on your system. All the necessary R packages will get installed and loaded automatically.
-
-## Scripts
-
-There is one main script for the RACE-seq analysis
-
- - *RACEseqMM.r* is an optimized R script that combines and configures all the necessary command line packages in a complete pipeline solution. The script will get all the configuration options as command line parameters parsed with Rscript.
-
-In the *legacy_scripts* folder you can find the vanilla RACE-SEQ-lite script *stable.r*.
- - *stable.r* is a simple R script that uses the Cutadapt, Bowtie, Samtools and Bedtools packages and the configuration options need to be edited manually in the file. 
-
-## Usage 
-
-To use the **stable.r** you will need to have in the same directory the following files:
-- The RACE-SEQ-lite *stable.r* script downloded and edited.
-- Only one sequencing data file in .fastq format.
-- Only one reference sequence file in .fasta format.
-
-Open the *stable.r* using a text editor of your choice or Rstudio and edit the script variables according to your preferences:
-- Set the start (str) and finish (end) variables to the specific nucleotide positions of your reference in between which the graphs will be plotted. 
-- Input the specific adapter (RACE_adapter) nucleotide sequence which needs to be trimmed from the reads before alignment.
-- Set the file name (prefix) of the output and graph that will be created.
-- Set the mismatch tolerence (mismatch) during Bowtie alignment, set preferably between "0" and "3"
-
-To run the *stable.r* you can either use Rscript from the command line or run it from within Rstudio.
-
-## Usage 
-
-To use the **RACEseqMM.r** you will need to run it using Rscript from the command line
-```
-Rscript RACEseqMM.r
-```
-To get information and help about the script use option *--help* or *-h*
+First run the Rscript command to check that you can access the file and use R.
 ```
 Rscript RACEseqMM.r --help
 ```
+The help screen will be printed on your terminal.
+Now perform a test run using the example dataset provided in the *example_data* folder by using the minimum options.
+The file **sampe_data_mm0.tsv** file will be generated.
 
-Options           | Description
------------------ | --------------
--s, --start       | "Input the start nucleotide position"
--e, --end         | "Input the end nucleotide position"
--a, --adapter     | "Input the RACE adapter sequence [default: NO_trimming]"
--m, --mismatch    | "Input number of mismatches during alignement [default: %default]"
--p, --plot        | "Print output graph plot [default: NO]"
--t, --tmap        | "Use tmap aligner instead of bowtie [default: NO]"
---nocsv           | "Do not print output CSV file [default: NO]"
--i, --iterate     | "Create the alternative references to cover all the possible SNPs of the reference between the genomics locations specified by -s and -e and then perform global alignment and generate graph.[default: NO]"
--h, --help        | "Print this help page"              
+```
+Rscript -s 9478 -e 9498
+```
+This file is a tab delimited table that gives you the cleavage incidents that occurred in the genomic locations specified between *-s 9478* and *-e 9498* in actual numbers, in percentage and in a logarithmic scale as well.
+
+## Run with options
+Now this time run the script but with the *-p* option and the *--notsv* option as well.
+Using the *-p* option the script will to generate and print a graph of the cleavage incidents between the genomic locations.
+Using the *--notsv* option the script will not output a table file with the cleavage incidents.
+The file **sample_data_bowtie_mm0.pdf** file will be generated.
+
+```
+Rscript -s 9478 -e 9498 -p --notsv
+```
+Now run the script but give the option to perform alignment using Bowtie and allow for a 1 mismatch during alignment. You can use this option by allow for one or more mismatches during alignment. 
+The file **sample_data_bowtie_mm1.pdf** file will be generated.
+
+```
+Rscript -s 9478 -e 9498 -p --notsv -m 1
+```
+
+## Run the iterate mode
+By invoking the *-i* option will generate multiple reference sequences using all the possible nucleotide combinations found between the genomic locations provided and then try to align the dataset against all these new references. Using this option the default output will be two graphs, one for the seed region and one around the cleavage region of RNAi.   
+The files **sample_multiplot_cleavage_mm0.pdf** and **sample_multiplot_seed_mm0.pdf** will be generated.
+
+```
+Rscript -s 9478 -e 9498 -i
+
+```
+## All outputs
+The iterate *-i* option can be used along with generating an output table (without using *--notsv*) and a plot (*-p*). You can also allow for one or more mismatches during this process (-m 1). The command that will output all the possible files is:
+```
+Rscript -s 9478 -e 9498 -p --notsv -m 1 -p -i 
+```
+
+
 
 
 
