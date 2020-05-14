@@ -48,12 +48,15 @@ The file **sample_data_bowtie_mm0.pdf** file will be generated.
 ```
 Rscript -s 9478 -e 9498 -p --notsv
 ```
+[sample_data_bowtie_mm0.pdf](./sample_data_bowtie_mm0.pdf)
+
 Now run the script but give the option to perform alignment using Bowtie and allow for a 1 mismatch during alignment. You can use this option by allow for one or more mismatches during alignment. 
 The file **sample_data_bowtie_mm1.pdf** file will be generated.
 
 ```
 Rscript -s 9478 -e 9498 -p --notsv -m 1
 ```
+[sample_data_bowtie_mm1.pdf](./sample_data_bowtie_mm1.pdf)
 
 ## Run the iterate mode
 By invoking the *-i* option will generate multiple reference sequences using all the possible nucleotide combinations found between the genomic locations provided and then try to align the dataset against all these new references. Using this option the default output will be two graphs, one for the seed region and one around the cleavage region of RNAi.   
@@ -63,14 +66,14 @@ The files **sample_multiplot_cleavage_mm0.pdf** and **sample_multiplot_seed_mm0.
 Rscript -s 9478 -e 9498 -i
 
 ```
+[sample_data_multiplot_cleavage_mm0.pdf](./sample_data_multiplot_cleavage_mm0.pdf)
+
+[sample_data_multiplot_seed_mm0.pdf](./sample_data_multiplot_seed_mm0.pdf)
+
 ## All outputs
 The iterate *-i* option can be used along with generating an output table (without using *--notsv*) and a plot (*-p*). You can also allow for one or more mismatches during this process (-m 1). The command that will output all the possible files is:
 ```
 Rscript -s 9478 -e 9498 -p --notsv -m 1 -p -i 
 ```
-
-
-
-
 
 
